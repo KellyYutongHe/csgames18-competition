@@ -30,6 +30,8 @@ class MainActivity : FragmentActivity() {
     private var selectedSegmentIndex = 0
 
     private lateinit var segmentButtons: List<ImageButton>
+    ArrayList<HashMap<String, String>> pinList;
+
 
     @Inject
     lateinit var retrofit: Retrofit
@@ -50,6 +52,7 @@ class MainActivity : FragmentActivity() {
         setupButtons()
 
         downloadData()
+	parseData()
     }
 
     private fun downloadData() {
@@ -63,6 +66,54 @@ class MainActivity : FragmentActivity() {
             }
         })
     }
+
+	@Override
+      protected void parseData() {
+            try {
+               JSONArray map = jsonObj.getJSONArray("mapping.json");
+            	
+               // looping through All map
+               for (int i = 0; i < map.length(); i++) {
+                  JSONObject c = map.getJSONObject(i);
+                  String name = c.getString("name");
+                  String component = c.getString("component");
+                  String notes = c.getString("notes");
+                  String type = c.getString("type");
+                  double lat = c.getDouble("lat");
+		  double lon = c.getDouble("lon");
+		  String address = c.getString("address")
+
+                  // tmp hash map for single contact
+                  HashMap<String, String> pin = new HashMap<>();
+
+                  // adding each child node to HashMap key => value
+                  pin.put("name", name);
+		  pin.put("component", component);
+		  pin.put("notes", notes);
+		  pin.put("type", type);
+		  pin.put("lat", lat);
+		  pin.put("lon", lon);
+		  pin.put("address", address);
+               
+                  // adding contact to contact list
+                  pinList.add(contact);
+               }
+            } catch (final JSONException e) {
+               Log.e(TAG, "Json parsing error: " + e.getMessage());
+               runOnUiThread(new Runnable() {
+                  @Override
+                  public void run() {
+                     Toast.makeText(getApplicationContext(),
+                     "Json parsing error: " + e.getMessage(),
+                        Toast.LENGTH_LONG).show();
+                  }
+               });
+
+            }
+   
+         } 
+      }
+
 
     private fun setupMainView() {
         supportFragmentManager.beginTransaction()
